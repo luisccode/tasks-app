@@ -1,10 +1,10 @@
 import axios from "axios";
 import { Task } from "../interfaces/task.interface";
+import { APPSCRIPT_URL } from "../config/index.js";
 
 export class TastkService {
   private taskApi = axios.create({
-    baseURL:
-      "https://script.google.com/macros/s/AKfycbxzvqlXZN7fFLMgavnlKyz95kig6yaWQeMesL-EIT8QZ7j-azPeT8tXP_RXeFDFkRUdrA/exec",
+    baseURL: APPSCRIPT_URL!,
     headers: {
       "Content-Type": "application/json",
     },
@@ -38,6 +38,46 @@ export class TastkService {
   }
 
   public async createTask(task: Task) {
+    const { name, dueDate, type } = task;
+
+    let label = "";
+
+    // Label Logic
+    const currentDate = new Date();
+    const taskDueDate = new Date(dueDate);
+    const daysUntilDue = Math.floor(
+      (taskDueDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (type === "Work") {
+      if (daysUntilDue === 1) {
+        label = "Urgent";
+      } else if (name.includes("PLO") || name.includes("GJL")) {
+        if (daysUntilDue <= 30) {
+          label = "Can be postponed";
+        }
+      }
+    } else if (type === "Health") {
+      if (daysUntilDue <= 3 && !name.includes("Treatment")) {
+        label = "Urgent";
+      }
+    } else if (type === "Personal") {
+      if (daysUntilDue <= 7) {
+        label = "Can be postponed";
+      }
+    } else if (type === "Other") {
+      if (daysUntilDue <= 5) {
+        label = "Can be postponed";
+      }
+    }
+
+    if (daysUntilDue > 7) {
+      label = "Not important";
+    }
+
+    // Set the label in the task object
+    task.label = label;
+
     const response = await this.taskApi.post("", task);
 
     return response;

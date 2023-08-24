@@ -2,6 +2,6 @@ export interface Task {
   name: string;
   description: string;
   type: "Work" | "Health" | "Personal" | "Other";
-  label: string;
+  label?: string;
   dueDate: string;
 }

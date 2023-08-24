@@ -10,7 +10,6 @@ export const ValidationMiddleware = (
 
   if (!errors.isEmpty()) {
     const error = errors.array()[0].msg;
-    console.log(errors);
     return res.status(400).json({ error });
   }
 
